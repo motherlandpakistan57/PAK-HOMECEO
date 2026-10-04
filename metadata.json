@@ -1,0 +1,6 @@
+{
+  "name": "PAK-HOMECEO",
+  "description": "Every Home Can Become an Enterprise. Every Woman Can Become a CEO. A women-led home enterprise platform strategically prepared by Fakhar Mushtaq and co-designed by Team StrongerTogether.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
