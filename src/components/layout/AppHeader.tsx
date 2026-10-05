@@ -90,25 +90,23 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onToggleMobileSidebar }) =
             <span>{language === 'en' ? 'اردو' : 'English'}</span>
           </button>
 
-          {/* Clear DEMO MODE Indicator & Role Switcher */}
+          {/* Clear DEMO MODE Indicator & Active Role Badge */}
           {demoMode && (
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl text-xs">
               <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#01411C]">
                 <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
-                <span>Demo</span>
+                <span>Active Role</span>
               </span>
               <div className="h-3 w-px bg-[#BBF7D0]" />
-              <select
-                value={currentRole === 'patron' ? 'citizen' : currentRole}
-                onChange={handleRoleQuickChange}
-                aria-label="Switch Demo Role"
-                className="bg-transparent text-xs font-bold text-[#1A2E22] focus:outline-none cursor-pointer capitalize pr-1"
-              >
-                <option value="builder">Business Builder</option>
-                <option value="partner">Skill Partner</option>
-                <option value="connector">Connector</option>
-                <option value="citizen">Citizen</option>
-              </select>
+              <span className="text-xs font-bold text-[#01411C] capitalize pr-1">
+                {currentRole === 'patron' || currentRole === 'citizen'
+                  ? 'Citizen'
+                  : currentRole === 'builder'
+                  ? 'Business Builder'
+                  : currentRole === 'partner'
+                  ? 'Skill Partner'
+                  : 'Community Connector'}
+              </span>
             </div>
           )}
 

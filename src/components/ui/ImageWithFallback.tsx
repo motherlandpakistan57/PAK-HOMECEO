@@ -20,7 +20,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
 
   // If no src provided or image failed to load, render the high-fidelity SVG illustration
-  if (!src || hasError) {
+  if (!src || src.trim() === '' || hasError) {
     return <ProductIconGraphic iconType={iconType} title={title} className={className} />;
   }
 

@@ -63,7 +63,8 @@ export interface OrderFeedback {
   id: string;
   orderId: string;
   productTitle: string;
-  patronName: string;
+  citizenName?: string;
+  patronName?: string;
   rating: number;
   comment: string;
   date: string;
@@ -282,6 +283,7 @@ export interface UserProfile {
   badge: string;
   bio?: string;
   verified: boolean;
+  password?: string;
 }
 
 export interface BusinessBuilderProfile {

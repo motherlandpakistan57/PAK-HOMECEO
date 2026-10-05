@@ -54,6 +54,7 @@ import {
   SEED_MESSAGES,
   SEED_SKILL_PARTNER_TASKS,
 } from '../data/seedData';
+import { triggerOrderPlacedCelebration, triggerProcessCompleteCelebration } from '../utils/celebration';
 
 export interface AppContextType {
   // Navigation & User State
@@ -114,13 +115,31 @@ export interface AppContextType {
   isNotificationsOpen: boolean;
   setIsNotificationsOpen: (open: boolean) => void;
 
+  registeredAccounts: UserProfile[];
+  registerAccount: (data: {
+    name: string;
+    email: string;
+    password?: string;
+    role: UserRole;
+    city: string;
+    phone: string;
+    title?: string;
+    bio?: string;
+  }) => { success: boolean; message?: string; user?: UserProfile };
+  loginAccount: (email: string, password?: string) => { success: boolean; message?: string; user?: UserProfile };
+  logoutAccount: () => void;
+
   // Video Showcase & Platform Media state
   videoConfig: PlatformVideoConfig;
   updateVideoConfig: (config: Partial<PlatformVideoConfig>) => void;
   customImages: PlatformCustomImage[];
+  hiddenSlideIds: string[];
   addCustomImage: (img: Omit<PlatformCustomImage, 'id' | 'uploadedAt'>) => void;
+  updateCustomImage: (id: string, updates: Partial<PlatformCustomImage>) => void;
   removeCustomImage: (id: string) => void;
   clearCustomImages: () => void;
+  toggleHideSlide: (id: string) => void;
+  restoreAllSlides: () => void;
 
   // Enterprise & Role Operations
   placeOrder: (data: {
@@ -192,6 +211,17 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'pak_homeceo_app_state_v3';
 
+function safeJsonParse<T>(key: string, fallback: T): T {
+  try {
+    const saved = localStorage.getItem(key);
+    if (!saved || saved === 'undefined' || saved === 'null') return fallback;
+    return JSON.parse(saved);
+  } catch (e) {
+    console.warn(`Failed to parse localStorage key "${key}":`, e);
+    return fallback;
+  }
+}
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Navigation & Role
   const [currentView, setCurrentView] = useState<AppView>('welcome');
@@ -208,106 +238,95 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  // Entities with persistence
+  // Entities with persistence using safeJsonParse
   const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_products`);
-    return saved ? JSON.parse(saved) : SEED_PRODUCTS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_products`, SEED_PRODUCTS);
   });
 
   const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_orders`);
-    return saved ? JSON.parse(saved) : SEED_ORDERS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_orders`, SEED_ORDERS);
   });
 
   const [batches, setBatches] = useState<ProductionBatch[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_batches`);
-    return saved ? JSON.parse(saved) : SEED_BATCHES;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_batches`, SEED_BATCHES);
   });
 
   const [skillPartners, setSkillPartners] = useState<SkillPartnerProfile[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_partners`);
-    return saved ? JSON.parse(saved) : SEED_SKILL_PARTNERS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_partners`, SEED_SKILL_PARTNERS);
   });
 
   const [businessBuilders, setBusinessBuilders] = useState<BusinessBuilderProfile[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_builders`);
-    return saved ? JSON.parse(saved) : SEED_BUSINESS_BUILDERS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_builders`, SEED_BUSINESS_BUILDERS);
   });
 
   const [connectors, setConnectors] = useState<ConnectorProfile[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_connectors`);
-    return saved ? JSON.parse(saved) : SEED_CONNECTORS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_connectors`, SEED_CONNECTORS);
   });
 
   const [patrons, setPatrons] = useState<PatronProfile[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_patrons`);
-    return saved ? JSON.parse(saved) : SEED_PATRONS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_patrons`, SEED_PATRONS);
   });
 
   const [connectorTasks, setConnectorTasks] = useState<ConnectorTask[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_tasks`);
-    return saved ? JSON.parse(saved) : SEED_CONNECTOR_TASKS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_tasks`, SEED_CONNECTOR_TASKS);
   });
 
   const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_ledger`);
-    return saved ? JSON.parse(saved) : SEED_LEDGER_ENTRIES;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_ledger`, SEED_LEDGER_ENTRIES);
   });
 
   const [payouts, setPayouts] = useState<PayoutRecord[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_payouts`);
-    return saved ? JSON.parse(saved) : SEED_PAYOUTS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_payouts`, SEED_PAYOUTS);
   });
 
   const [qualityChecks, setQualityChecks] = useState<QualityCheckRecord[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_qc`);
-    return saved ? JSON.parse(saved) : SEED_QUALITY_CHECKS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_qc`, SEED_QUALITY_CHECKS);
   });
 
   const [messages, setMessages] = useState<AppMessage[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_messages`);
-    return saved ? JSON.parse(saved) : SEED_MESSAGES;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_messages`, SEED_MESSAGES);
   });
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_audit`);
-    return saved ? JSON.parse(saved) : SEED_AUDIT_LOGS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_audit`, SEED_AUDIT_LOGS);
   });
 
   const [skillPartnerTasks, setSkillPartnerTasks] = useState<SkillPartnerTask[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_sptasks`);
-    return saved ? JSON.parse(saved) : SEED_SKILL_PARTNER_TASKS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_sptasks`, SEED_SKILL_PARTNER_TASKS);
   });
 
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_notifs`);
-    return saved ? JSON.parse(saved) : SEED_NOTIFICATIONS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_notifs`, SEED_NOTIFICATIONS);
   });
 
   const [impactMetrics, setImpactMetrics] = useState<PlatformMetrics>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_metrics`);
-    return saved ? JSON.parse(saved) : INITIAL_METRICS;
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_metrics`, INITIAL_METRICS);
   });
 
   // Video state
   const [videoConfig, setVideoConfig] = useState<PlatformVideoConfig>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_video`);
-    return saved
-      ? JSON.parse(saved)
-      : {
-          videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0',
-          title: 'PAK-HOMECEO: Transforming Household Capability Into Scalable Enterprise',
-          description: 'A 2-minute strategic walk-through explaining the closed-loop economic model connecting young business managers with skilled home artisans.',
-          isCustomUploaded: false,
-          aspectRatio: '16:9',
-          autoPlay: false,
-        };
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_video`, {
+      videoUrl: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=1200&q=80',
+      title: 'PAK-HOMECEO: Transforming Household Capability Into Scalable Enterprise',
+      description: 'A 2-minute strategic walk-through explaining the closed-loop economic model connecting young business managers with skilled home artisans.',
+      isCustomUploaded: false,
+      aspectRatio: '16:9',
+      autoPlay: false,
+    });
   });
 
   // Custom Platform Media Uploads
   const [customImages, setCustomImages] = useState<PlatformCustomImage[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_custom_images`);
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_custom_images`, []);
+  });
+
+  const [hiddenSlideIds, setHiddenSlideIds] = useState<string[]>(() => {
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_hidden_slide_ids`, []);
+  });
+
+  // Registered Accounts (Real Account Creation & Auth)
+  const [registeredAccounts, setRegisteredAccounts] = useState<UserProfile[]>(() => {
+    return safeJsonParse(`${LOCAL_STORAGE_KEY}_registered_accounts`, []);
   });
 
   // Global Toast System
@@ -378,27 +397,176 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(`Switched to ${label} profile.`, 'success', 'Role Updated');
   }, [showToast]);
 
-  // Sync to LocalStorage
+  // Real Account Registration
+  const registerAccount = useCallback(
+    (data: {
+      name: string;
+      email: string;
+      password?: string;
+      role: UserRole;
+      city: string;
+      phone: string;
+      title?: string;
+      bio?: string;
+    }): { success: boolean; message?: string; user?: UserProfile } => {
+      const emailNormalized = data.email.trim().toLowerCase();
+      if (!emailNormalized || !data.name.trim()) {
+        return { success: false, message: 'Name and email are required.' };
+      }
+
+      // Check if user already exists
+      const existing = registeredAccounts.find((u) => u.email.toLowerCase() === emailNormalized);
+      if (existing) {
+        return { success: false, message: 'An account with this email already exists. Please Sign In.' };
+      }
+
+      const roleCodePrefix = data.role === 'builder' ? 'BB' : data.role === 'partner' ? 'SP' : data.role === 'connector' ? 'CC' : 'CTZ';
+      const cityCode = (data.city || 'KHI').slice(0, 3).toUpperCase();
+      const code = `${roleCodePrefix}-${cityCode}-${Math.floor(100 + Math.random() * 900)}`;
+
+      const newUser: UserProfile = {
+        id: `user-${Date.now()}`,
+        name: data.name.trim(),
+        email: emailNormalized,
+        password: data.password || 'pakistan2026',
+        role: data.role,
+        city: data.city.trim() || 'Lahore',
+        phone: data.phone.trim() || '+92 300 1234567',
+        code,
+        title:
+          data.title?.trim() ||
+          (data.role === 'citizen'
+            ? 'Verified Citizen'
+            : data.role === 'builder'
+            ? 'Enterprise Business Builder'
+            : data.role === 'partner'
+            ? 'Registered Skill Partner'
+            : 'Community Field Coordinator'),
+        avatarUrl: '',
+        badge: `${data.role.toUpperCase()} · ${data.city || 'Pakistan'}`,
+        bio: data.bio?.trim() || `Verified ${data.role} member of PAK-HOMECEO.`,
+        verified: true,
+      };
+
+      setRegisteredAccounts((prev) => [newUser, ...prev]);
+      setCurrentUser(newUser);
+      setCurrentRole(newUser.role);
+      setDemoMode(false);
+      setIsRealMode(true);
+
+      // If registered as skill partner, also register into active skill partners list
+      if (newUser.role === 'partner') {
+        const newPartnerProfile: SkillPartnerProfile = {
+          id: `sp-${Date.now()}`,
+          name: newUser.name,
+          anonymizedCode: newUser.code,
+          skillTitle: newUser.title,
+          specialty: newUser.bio || 'Home artisan enterprise participant',
+          city: newUser.city,
+          district: 'Urban Center',
+          craftExperienceYears: 5,
+          activeBatchesCount: 0,
+          completedOrdersCount: 0,
+          totalEarningsPKR: 0,
+          pendingPayoutPKR: 0,
+          rating: 5.0,
+          voiceGuidanceScript: `Welcome ${newUser.name}. Your workspace is active and ready for batch assignments.`,
+          consentRecorded: true,
+          assignedConnectorName: 'Fatima Zehra',
+          avatarUrl: newUser.avatarUrl,
+        };
+        setSkillPartners((prev) => [newPartnerProfile, ...prev]);
+      }
+
+      showToast(`Account created successfully! Welcome, ${newUser.name}.`, 'success', 'Account Registered');
+      return { success: true, user: newUser };
+    },
+    [registeredAccounts, showToast]
+  );
+
+  // Real Account Login
+  const loginAccount = useCallback(
+    (email: string, password?: string): { success: boolean; message?: string; user?: UserProfile } => {
+      const emailNormalized = email.trim().toLowerCase();
+      if (!emailNormalized) {
+        return { success: false, message: 'Please enter your email address.' };
+      }
+
+      // 1. Check custom registered accounts
+      const foundCustom = registeredAccounts.find((u) => u.email.toLowerCase() === emailNormalized);
+      if (foundCustom) {
+        if (password && foundCustom.password && foundCustom.password !== password) {
+          return { success: false, message: 'Incorrect password. Please try again.' };
+        }
+        setCurrentUser(foundCustom);
+        setCurrentRole(foundCustom.role);
+        setDemoMode(false);
+        setIsRealMode(true);
+        showToast(`Welcome back, ${foundCustom.name}!`, 'success', 'Signed In');
+        return { success: true, user: foundCustom };
+      }
+
+      // 2. Check preset demo accounts by email
+      const demoRoles: UserRole[] = ['citizen', 'builder', 'partner', 'connector'];
+      for (const r of demoRoles) {
+        const demoUser = DEMO_PROFILES[r];
+        if (demoUser.email.toLowerCase() === emailNormalized) {
+          setCurrentUser(demoUser);
+          setCurrentRole(r);
+          setDemoMode(true);
+          setIsRealMode(false);
+          showToast(`Signed in as ${demoUser.name} (${r}).`, 'success', 'Demo Access');
+          return { success: true, user: demoUser };
+        }
+      }
+
+      return {
+        success: false,
+        message: 'No account found with this email. You can create a new account or select 1-click Demo entry.',
+      };
+    },
+    [registeredAccounts, showToast]
+  );
+
+  const logoutAccount = useCallback(() => {
+    setCurrentRole('citizen');
+    setCurrentUser(DEMO_PROFILES.citizen);
+    setDemoMode(true);
+    setIsRealMode(false);
+    showToast('You have been logged out.', 'info', 'Logged Out');
+  }, [showToast]);
+
+  // Sync to LocalStorage safely without throwing QuotaExceededError
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_products`, JSON.stringify(products));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_orders`, JSON.stringify(orders));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_batches`, JSON.stringify(batches));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_partners`, JSON.stringify(skillPartners));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_builders`, JSON.stringify(businessBuilders));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_connectors`, JSON.stringify(connectors));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_patrons`, JSON.stringify(patrons));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_tasks`, JSON.stringify(connectorTasks));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_ledger`, JSON.stringify(ledgerEntries));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_payouts`, JSON.stringify(payouts));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_qc`, JSON.stringify(qualityChecks));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_messages`, JSON.stringify(messages));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_sptasks`, JSON.stringify(skillPartnerTasks));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_audit`, JSON.stringify(auditLogs));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_notifs`, JSON.stringify(notifications));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_metrics`, JSON.stringify(impactMetrics));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_video`, JSON.stringify(videoConfig));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_custom_images`, JSON.stringify(customImages));
-  }, [products, orders, batches, skillPartners, businessBuilders, connectors, patrons, connectorTasks, skillPartnerTasks, ledgerEntries, payouts, qualityChecks, messages, auditLogs, notifications, impactMetrics, videoConfig, customImages]);
+    const safeSet = (key: string, val: any) => {
+      try {
+        localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+      } catch (err) {
+        console.warn(`localStorage save error for ${key}:`, err);
+      }
+    };
+
+    safeSet(`${LOCAL_STORAGE_KEY}_products`, products);
+    safeSet(`${LOCAL_STORAGE_KEY}_orders`, orders);
+    safeSet(`${LOCAL_STORAGE_KEY}_batches`, batches);
+    safeSet(`${LOCAL_STORAGE_KEY}_partners`, skillPartners);
+    safeSet(`${LOCAL_STORAGE_KEY}_builders`, businessBuilders);
+    safeSet(`${LOCAL_STORAGE_KEY}_connectors`, connectors);
+    safeSet(`${LOCAL_STORAGE_KEY}_patrons`, patrons);
+    safeSet(`${LOCAL_STORAGE_KEY}_tasks`, connectorTasks);
+    safeSet(`${LOCAL_STORAGE_KEY}_ledger`, ledgerEntries);
+    safeSet(`${LOCAL_STORAGE_KEY}_payouts`, payouts);
+    safeSet(`${LOCAL_STORAGE_KEY}_qc`, qualityChecks);
+    safeSet(`${LOCAL_STORAGE_KEY}_messages`, messages);
+    safeSet(`${LOCAL_STORAGE_KEY}_sptasks`, skillPartnerTasks);
+    safeSet(`${LOCAL_STORAGE_KEY}_audit`, auditLogs);
+    safeSet(`${LOCAL_STORAGE_KEY}_notifs`, notifications);
+    safeSet(`${LOCAL_STORAGE_KEY}_metrics`, impactMetrics);
+    safeSet(`${LOCAL_STORAGE_KEY}_video`, videoConfig);
+    safeSet(`${LOCAL_STORAGE_KEY}_custom_images`, customImages);
+    safeSet(`${LOCAL_STORAGE_KEY}_hidden_slide_ids`, hiddenSlideIds);
+    safeSet(`${LOCAL_STORAGE_KEY}_registered_accounts`, registeredAccounts);
+  }, [products, orders, batches, skillPartners, businessBuilders, connectors, patrons, connectorTasks, skillPartnerTasks, ledgerEntries, payouts, qualityChecks, messages, auditLogs, notifications, impactMetrics, videoConfig, customImages, hiddenSlideIds, registeredAccounts]);
 
   const resetDemo = useCallback(() => {
     setProducts(SEED_PRODUCTS);
@@ -438,6 +606,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(`Image "${img.name}" successfully added to platform visual assets pool!`, 'success', 'Asset Uploaded');
   };
 
+  const updateCustomImage = (id: string, updates: Partial<PlatformCustomImage>) => {
+    setCustomImages((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, ...updates } : img))
+    );
+    showToast('Visual asset caption updated successfully.', 'success', 'Image Saved');
+  };
+
   const removeCustomImage = (id: string) => {
     setCustomImages((prev) => prev.filter((img) => img.id !== id));
     showToast('Visual asset removed from platform pool.', 'info', 'Asset Removed');
@@ -446,6 +621,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const clearCustomImages = () => {
     setCustomImages([]);
     showToast('All custom uploaded images cleared.', 'info');
+  };
+
+  const toggleHideSlide = (id: string) => {
+    setHiddenSlideIds((prev) => {
+      const exists = prev.includes(id);
+      if (exists) {
+        showToast('Image restored to live rotation loop.', 'success', 'Image Kept');
+        return prev.filter((i) => i !== id);
+      } else {
+        showToast('Image removed from active rotation loop.', 'info', 'Image Hidden');
+        return [...prev, id];
+      }
+    });
+  };
+
+  const restoreAllSlides = () => {
+    setHiddenSlideIds([]);
+    showToast('All slides restored to active gallery loop.', 'success');
   };
 
   // Notification actions
@@ -595,6 +788,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...prev,
       totalIncomeGeneratedPKR: prev.totalIncomeGeneratedPKR + totalPKR,
     }));
+
+    // Trigger festive order celebration
+    triggerOrderPlacedCelebration();
 
     showToast(
       isPreOrder ? `Pre-Order ${trackingNumber} recorded in batch queue!` : `Order ${trackingNumber} placed successfully!`,
@@ -764,6 +960,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `fb-${Date.now()}`,
       orderId,
       productTitle: '',
+      citizenName: currentUser.name,
       patronName: currentUser.name,
       rating,
       comment,
@@ -989,6 +1186,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : o
       )
     );
+    triggerProcessCompleteCelebration();
     showToast(`Order confirmed delivered to patron. Escrow payout ready for settlement.`, 'success', 'Delivered');
   };
 
@@ -999,6 +1197,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, payoutReleased: true } : o))
     );
+    triggerProcessCompleteCelebration();
 
     const timestamp = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
     const newLedger: LedgerEntry = {
@@ -1370,12 +1569,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isNotificationsOpen,
         setIsNotificationsOpen,
 
+        registeredAccounts,
+        registerAccount,
+        loginAccount,
+        logoutAccount,
+
         videoConfig,
         updateVideoConfig,
         customImages,
+        hiddenSlideIds,
         addCustomImage,
+        updateCustomImage,
         removeCustomImage,
         clearCustomImages,
+        toggleHideSlide,
+        restoreAllSlides,
 
         placeOrder,
         submitOrderFeedback,

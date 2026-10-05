@@ -7,6 +7,7 @@ import { StatCard } from '../ui/StatCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { Stepper } from '../ui/Stepper';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
+import { Avatar } from '../ui/Avatar';
 import {
   ShoppingBag,
   Star,
@@ -497,14 +498,7 @@ export const PatronMarketplace: React.FC<PatronMarketplaceProps> = ({
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="relative shrink-0">
-                          <img
-                            src={maker.avatarUrl || OFFICIAL_VISUAL_LIBRARY.artisan_dignity.imageUrl}
-                            alt={maker.name}
-                            className="w-12 h-12 rounded-2xl object-cover object-top border border-stone-200"
-                          />
-                          <span className="absolute -bottom-1 -right-1 bg-black/75 text-[8px] text-stone-200 font-mono px-1 rounded">
-                            Demo
-                          </span>
+                          <Avatar name={maker.name} size="lg" />
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
@@ -608,33 +602,7 @@ export const PatronMarketplace: React.FC<PatronMarketplaceProps> = ({
               </div>
             </section>
 
-            {/* SECTION 4: NEW THIS WEEK */}
-            <section className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-[#1A2E22]">
-                    New This Week
-                  </h2>
-                  <p className="text-xs text-[#4A5D52]">
-                    Freshly inspected craft batches ready for customer allocation
-                  </p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {newThisWeek.map((p) => (
-                  <ProductCardItem
-                    key={p.id}
-                    product={p}
-                    onViewProduct={() => setDetailProduct(p)}
-                    onAddToCart={() => handleAddToCart(p)}
-                    onOrderNow={() => handleOpenBrief(p, p.stockReadyUnits <= 0)}
-                    isSaved={savedProductIds.includes(p.id)}
-                    onToggleSave={() => handleToggleSave(p.id)}
-                  />
-                ))}
-              </div>
-            </section>
 
             {/* SECTION 5: IMPACT */}
             <section className="p-8 bg-[#F0FDF4] rounded-3xl border-2 border-[#BBF7D0] space-y-6">
@@ -870,22 +838,15 @@ export const PatronMarketplace: React.FC<PatronMarketplaceProps> = ({
             {/* Closed Loop Architecture Callout */}
             <div className="p-4 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-[#01411C]">
               <div>
-                <span className="font-extrabold block">How the Closed-Loop Fulfillment Works:</span>
+                <span className="font-extrabold block">Closed-Loop Order Fulfillment Guarantees:</span>
                 <span className="text-[#4A5D52]">
-                  Your order is received by Product Manager Zainab Malik → Assigned to a Master Artisan batch → Verified at doorstep by Field Connector Fatima → Dispatched & Escrow released.
+                  Your order is verified by Product Manager Zainab Malik → Produced by Master Artisans → Doorstep QA audited by Field Connector Fatima → Real-time tracking delivered to your door.
                 </span>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="shrink-0 text-[#01411C] border-[#BBF7D0]"
-                onClick={() => {
-                  switchRole('builder');
-                  showToast('Switched to Business Builder to inspect incoming order triage.', 'info', 'Role Switched');
-                }}
-              >
-                Inspect in Manager View
-              </Button>
+              <span className="shrink-0 px-3 py-1 bg-white border border-[#BBF7D0] rounded-xl text-[11px] font-bold text-[#01411C] flex items-center gap-1.5 shadow-2xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>100% Verified Closed Loop</span>
+              </span>
             </div>
 
             {orders.length === 0 ? (

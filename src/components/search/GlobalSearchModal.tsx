@@ -68,7 +68,7 @@ export const GlobalSearchModal: React.FC = () => {
             p.city.toLowerCase().includes(q) ||
             p.producerName.toLowerCase().includes(q)
         )
-        .slice(0, 4)
+        .slice(0, 10)
     : [];
 
   // Filter orders

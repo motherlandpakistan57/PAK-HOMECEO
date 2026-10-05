@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
+import { Avatar } from '../ui/Avatar';
 import {
   User,
   Settings,
@@ -87,11 +88,7 @@ export const ProfileMenu: React.FC = () => {
         aria-expanded={isOpen}
         className="flex items-center gap-2 p-1 sm:p-1.5 rounded-xl hover:bg-[#F0FDF4] transition-colors border border-transparent hover:border-[#BBF7D0] cursor-pointer"
       >
-        <img
-          src={currentUser.avatarUrl}
-          alt={currentUser.name}
-          className="w-8 h-8 rounded-full object-cover border border-stone-200"
-        />
+        <Avatar name={currentUser.name} src={currentUser.avatarUrl} size="sm" />
         <div className="hidden sm:block text-left">
           <p className="text-xs font-bold text-[#1A2E22] truncate max-w-[110px] leading-tight font-sans">
             {currentUser.name}
@@ -115,11 +112,7 @@ export const ProfileMenu: React.FC = () => {
           {/* User Info Header */}
           <div className="px-4 py-3 border-b border-stone-100 bg-[#FAF9F6] rounded-t-xl">
             <div className="flex items-center gap-3">
-              <img
-                src={currentUser.avatarUrl}
-                alt={currentUser.name}
-                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-xs"
-              />
+              <Avatar name={currentUser.name} src={currentUser.avatarUrl} size="md" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <h4 className="text-xs font-bold text-[#1A2E22] truncate font-sans">

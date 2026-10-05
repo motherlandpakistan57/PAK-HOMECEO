@@ -80,6 +80,11 @@
   50% { height: 28px; }
 }
 
+@keyframes progress5s {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
 .animate-wave-1 { animation: soundwave 1.2s ease-in-out infinite; }
 .animate-wave-2 { animation: soundwave 0.9s ease-in-out infinite 0.2s; }
 .animate-wave-3 { animation: soundwave 1.4s ease-in-out infinite 0.4s; }

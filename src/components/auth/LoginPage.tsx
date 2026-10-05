@@ -5,10 +5,7 @@ import { UserRole } from '../../types';
 import {
   ShieldCheck,
   ArrowRight,
-  Phone,
-  Mail,
   Sparkles,
-  CheckCircle2,
   Users,
   Layers,
   HeartHandshake,
@@ -18,102 +15,174 @@ import {
   Play,
   RotateCcw,
   Link as LinkIcon,
-  Check,
+  CheckCircle2,
+  LogIn,
+  UserPlus,
   Lock,
+  Mail,
+  User,
+  MapPin,
+  Phone,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useLanguage } from '../../context/LanguageContext';
+import { triggerWelcomeToLoginCelebration, triggerRoleSelectCelebration } from '../../utils/celebration';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { language, toggleLanguage } = useLanguage();
+
+  // Trigger celebratory welcoming burst on landing
+  React.useEffect(() => {
+    triggerWelcomeToLoginCelebration();
+  }, []);
   const {
     switchRole,
     setDemoMode,
     showToast,
     videoConfig,
     updateVideoConfig,
+    loginAccount,
+    registerAccount,
   } = useApp();
+
+  // Auth Modes: 'demo' | 'signin' | 'register'
+  const [authMode, setAuthMode] = useState<'demo' | 'signin' | 'register'>('demo');
+
+  // Sign In State
+  const [signInEmail, setSignInEmail] = useState('');
+  const [signInPassword, setSignInPassword] = useState('');
+
+  // Register State
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regRole, setRegRole] = useState<UserRole>('citizen');
+  const [regCity, setRegCity] = useState('Lahore');
+  const [regPhone, setRegPhone] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [customUrl, setCustomUrl] = useState('');
-  const [showCredentialsForm, setShowCredentialsForm] = useState(false);
-  const [authPhone, setAuthPhone] = useState('0300-7821940');
-  const [authRole, setAuthRole] = useState<UserRole>('builder');
 
-  // The 4 Core Platform Roles
+  // 4 Core Platform Roles
   const roles = [
     {
       role: 'citizen' as UserRole,
       title: 'Citizen',
-      badge: 'Marketplace Access',
-      tagline: 'Discover artisan stories, buy authentic heritage goods, and track closed-loop deliveries.',
-      icon: <Compass className="w-6 h-6 text-blue-700" />,
-      bgLight: 'bg-blue-50/60 border-blue-200/80',
+      urdu: 'شہری',
+      badge: 'Marketplace',
+      tagline: 'Browse local products, book custom pre-orders, and track doorstep deliveries.',
+      icon: <Compass className="w-5 h-5 text-blue-700" />,
+      accentColor: 'border-blue-200 hover:border-blue-600 hover:bg-blue-50/50',
+      badgeBg: 'bg-blue-100 text-blue-800 border-blue-200',
       route: '/citizen',
-      persona: 'Amina Siddiqui · Citizen',
-      highlights: [
-        'Direct ethical purchases with ~70% going to makers',
-        'Live 6-stage order tracking to your doorstep',
-        'Real Pakistani heritage without charity or pity',
-      ],
+      persona: 'Amina Siddiqui',
+      demoEmail: 'amina.siddiqui@pak-homeceo.pk',
     },
     {
       role: 'builder' as UserRole,
-      title: 'Business Builder (Product Manager)',
-      badge: 'Command Center',
-      tagline: 'Oversee enterprise operations, receive citizen orders, allocate batches, and verify quality audits.',
-      icon: <Layers className="w-6 h-6 text-[#01411C]" />,
-      bgLight: 'bg-[#F0FDF4] border-[#BBF7D0]',
+      title: 'Business Builder',
+      urdu: 'کاروباری منتظم',
+      badge: 'Operations',
+      tagline: 'Review briefs, schedule production batches, assign artisans, and release payouts.',
+      icon: <Layers className="w-5 h-5 text-[#01411C]" />,
+      accentColor: 'border-emerald-200 hover:border-[#01411C] hover:bg-emerald-50/50',
+      badgeBg: 'bg-emerald-100 text-[#01411C] border-emerald-200',
       route: '/business-builder',
-      persona: 'Zainab Malik · Operations Lead',
-      highlights: [
-        'Centralized order intake & batch synthesis',
-        '6-point physical doorstep quality signoffs',
-        'Escrow verification & direct artisan payout release',
-      ],
+      persona: 'Zainab Malik',
+      demoEmail: 'zainab.malik@pak-homeceo.pk',
     },
     {
       role: 'partner' as UserRole,
-      title: 'Skill Partner (Master Artisan)',
+      title: 'Skill Partner',
+      urdu: 'ہنرمند ساتھی',
       badge: 'Artisan Hub',
-      tagline: 'Turning home-based skills into income, dignity, and purpose in later life with Urdu voice guidance.',
-      icon: <Users className="w-6 h-6 text-[#01411C]" />,
-      bgLight: 'bg-[#F0FDF4] border-[#BBF7D0]',
+      tagline: 'Craft production tasks with Urdu voice guidance, progress tracking, and direct pay.',
+      icon: <Users className="w-5 h-5 text-[#C05638]" />,
+      accentColor: 'border-orange-200 hover:border-[#C05638] hover:bg-orange-50/50',
+      badgeBg: 'bg-orange-100 text-[#C05638] border-orange-200',
       route: '/skill-partner',
-      persona: 'Kalsoom Bibi (KB-MLT-402) · Multan',
-      highlights: [
-        'Dignified, high-contrast, large-touch interface',
-        'Voice instructions in Urdu for domestic artisans',
-        'Direct mobile wallet earnings (PKR) without middlemen',
-      ],
+      persona: 'Kalsoom Bibi (KB-MLT-402)',
+      demoEmail: 'kalsoom.bibi@pak-homeceo.pk',
     },
     {
       role: 'connector' as UserRole,
       title: 'Community Connector',
-      badge: 'Field Operations',
-      tagline: 'Doorstep raw material delivery, gentle physical checks, and local human encouragement.',
-      icon: <HeartHandshake className="w-6 h-6 text-amber-700" />,
-      bgLight: 'bg-amber-50/60 border-amber-200/80',
+      urdu: 'رابطہ کار',
+      badge: 'Field Ops',
+      tagline: 'Doorstep raw material drops, artisan check-ins, and physical quality audits.',
+      icon: <HeartHandshake className="w-5 h-5 text-[#D9822B]" />,
+      accentColor: 'border-amber-200 hover:border-[#D9822B] hover:bg-amber-50/50',
+      badgeBg: 'bg-amber-100 text-[#D9822B] border-amber-200',
       route: '/community-connector',
-      persona: 'Fatima Zehra · Field Coordinator',
-      highlights: [
-        'Doorstep check-ins & raw material drop-offs',
-        'Fast 3-step field workflow (Open → Verify → Log)',
-        'Human connection and artisan encouragement',
-      ],
+      persona: 'Fatima Zehra',
+      demoEmail: 'fatima.zehra@pak-homeceo.pk',
     },
   ];
 
-  const handleSelectRole = (r: typeof roles[0]) => {
+  const handleSelectDemoRole = (r: typeof roles[0]) => {
+    triggerRoleSelectCelebration(r.role);
     switchRole(r.role);
     setDemoMode(true);
-    showToast(`Entering as ${r.title}. Welcome to PAK-HOMECEO!`, 'success', 'Role Activated');
+    showToast(`Welcome, ${r.persona}! Entering as ${r.title}.`, 'success', 'Role Activated');
     navigate(r.route);
   };
 
-  // Video Upload Handlers
+  const handleSignInSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!signInEmail.trim()) {
+      showToast('Please enter your email address.', 'warning');
+      return;
+    }
+    const result = loginAccount(signInEmail, signInPassword);
+    if (result.success && result.user) {
+      triggerRoleSelectCelebration(result.user.role);
+      const roleRoute =
+        result.user.role === 'builder'
+          ? '/business-builder'
+          : result.user.role === 'partner'
+          ? '/skill-partner'
+          : result.user.role === 'connector'
+          ? '/community-connector'
+          : '/citizen';
+      navigate(roleRoute);
+    } else {
+      showToast(result.message || 'Login failed.', 'error');
+    }
+  };
+
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regName.trim() || !regEmail.trim()) {
+      showToast('Please enter your full name and email.', 'warning');
+      return;
+    }
+    const result = registerAccount({
+      name: regName,
+      email: regEmail,
+      password: regPassword,
+      role: regRole,
+      city: regCity,
+      phone: regPhone,
+    });
+    if (result.success && result.user) {
+      triggerRoleSelectCelebration(result.user.role);
+      const roleRoute =
+        result.user.role === 'builder'
+          ? '/business-builder'
+          : result.user.role === 'partner'
+          ? '/skill-partner'
+          : result.user.role === 'connector'
+          ? '/community-connector'
+          : '/citizen';
+      navigate(roleRoute);
+    } else {
+      showToast(result.message || 'Registration failed.', 'error');
+    }
+  };
+
+  // Video Handlers
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -124,7 +193,7 @@ export const LoginPage: React.FC = () => {
         isCustomUploaded: true,
         uploadedFileName: file.name,
       });
-      showToast(`Video "${file.name}" uploaded and ready for display!`, 'success', 'Video Uploaded');
+      showToast(`Video "${file.name}" uploaded successfully!`, 'success', 'Video Configured');
     }
   };
 
@@ -141,13 +210,13 @@ export const LoginPage: React.FC = () => {
 
     updateVideoConfig({
       videoUrl: finalUrl,
-      title: 'Platform Overview Video',
+      title: 'PAK-HOMECEO Platform Showcase',
       isCustomUploaded: true,
       uploadedFileName: 'Web Video Stream',
     });
     setCustomUrl('');
     setShowUrlInput(false);
-    showToast('Video URL updated successfully!', 'success', 'Video Configured');
+    showToast('Platform video stream updated.', 'success', 'Video Ready');
   };
 
   const handleResetVideo = () => {
@@ -157,26 +226,27 @@ export const LoginPage: React.FC = () => {
       uploadedFileName: undefined,
       title: 'PAK-HOMECEO: Transforming Household Capability Into Scalable Enterprise',
     });
-    showToast('Video player reset to platform default showcase.', 'info', 'Video Reset');
+    showToast('Reset to platform default showcase.', 'info');
   };
 
-  const isEmbed = videoConfig.videoUrl.includes('youtube.com') || videoConfig.videoUrl.includes('vimeo.com');
+  const isEmbed =
+    videoConfig.videoUrl.includes('youtube.com') || videoConfig.videoUrl.includes('vimeo.com');
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#1A2E22] font-sans selection:bg-[#01411C]/20 selection:text-[#01411C]">
-      {/* Top Header */}
-      <header className="bg-white border-b border-stone-200/80 py-4 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      {/* Top Navigation */}
+      <header className="bg-white border-b border-stone-200/90 py-3 px-4 sm:px-6 lg:px-8 sticky top-0 z-30 shadow-2xs">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link to="/welcome" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#01411C] flex items-center justify-center text-white shadow-xs">
-              <span className="font-mono font-extrabold text-xs tracking-tighter">PK</span>
+            <div className="w-8 h-8 rounded-xl bg-[#01411C] flex items-center justify-center text-white font-mono font-bold text-xs shadow-xs">
+              PK
             </div>
             <div>
-              <span className="font-extrabold text-base tracking-tight text-[#1A2E22] block font-sans">
+              <span className="font-extrabold text-sm tracking-tight text-[#1A2E22] block font-sans">
                 PAK-HOMECEO
               </span>
               <span className="text-[10px] text-[#4A5D52] font-sans block -mt-0.5">
-                Pakistan Women-Led Enterprise Platform
+                Pakistan Home-Enterprise Platform
               </span>
             </div>
           </Link>
@@ -185,197 +255,339 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={toggleLanguage}
-              className="text-xs font-bold text-stone-700 hover:text-[#01411C] px-2.5 py-1.5 rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer flex items-center gap-1"
+              className="text-xs font-bold text-stone-700 hover:text-[#01411C] px-2.5 py-1 rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer"
             >
-              <span className="text-[10px] text-[#01411C] font-mono uppercase">Lang:</span>
+              <span className="text-[10px] text-[#01411C] font-mono mr-1">LANG:</span>
               <span>{language === 'en' ? 'اردو' : 'English'}</span>
             </button>
             <Link
               to="/welcome"
-              className="text-xs font-semibold text-[#4A5D52] hover:text-[#01411C] transition-colors hidden sm:block"
+              className="text-xs font-semibold text-[#4A5D52] hover:text-[#01411C] transition-colors"
             >
-              Back to Overview
+              Overview
             </Link>
-            <Button
-              onClick={() => {
-                switchRole('citizen');
-                navigate('/citizen');
-              }}
-              variant="outline"
-              size="sm"
-            >
-              <span>Citizen Marketplace</span>
-            </Button>
           </div>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-12">
-        {/* Role Selection Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F0FDF4] border border-[#BBF7D0] text-[11px] font-bold uppercase tracking-wider text-[#01411C]">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>Select Your Role to Enter Platform</span>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Header Title */}
+        <div className="text-center max-w-lg mx-auto space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#F0FDF4] border border-[#BBF7D0] text-[10px] font-bold uppercase tracking-wider text-[#01411C]">
+            <Sparkles className="w-3 h-3 text-amber-600" />
+            <span>Platform Entry & Role Access</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1A2E22] tracking-tight">
-            Role-Based Access
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1A2E22] tracking-tight">
+            Access Your Enterprise Role
           </h1>
-
-          <p className="text-xs sm:text-sm text-[#4A5D52] leading-relaxed">
-            Choose your perspective in the closed-loop system. Each role is designed around human dignity,
-            clear responsibilities, and transparent economic participation.
+          <p className="text-xs text-[#4A5D52]">
+            Create an account, sign in, or enter instantly via pre-configured demo personas.
           </p>
         </div>
 
-        {/* 4 Role-Based Access Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {roles.map((r) => (
-            <div
-              key={r.role}
-              onClick={() => handleSelectRole(r)}
-              className="bg-white rounded-3xl border-2 border-stone-200 hover:border-[#01411C] shadow-xs hover:shadow-xl transition-all duration-200 p-6 sm:p-7 flex flex-col justify-between cursor-pointer group space-y-5"
+        {/* Auth Mode Tabs (Demo, Sign In, Create Account) */}
+        <div className="bg-white rounded-3xl border border-stone-200/90 shadow-sm p-5 sm:p-7 space-y-6">
+          <div className="flex items-center justify-center p-1 bg-stone-100 rounded-2xl max-w-md mx-auto">
+            <button
+              type="button"
+              onClick={() => setAuthMode('demo')}
+              className={`flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                authMode === 'demo'
+                  ? 'bg-white text-[#01411C] shadow-2xs font-extrabold'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
             >
-              <div className="space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-2xl bg-[#F0FDF4] border border-[#BBF7D0] flex items-center justify-center shrink-0">
-                      {r.icon}
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>1-Click Demo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode('signin')}
+              className={`flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                authMode === 'signin'
+                  ? 'bg-white text-[#01411C] shadow-2xs font-extrabold'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode('register')}
+              className={`flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                authMode === 'register'
+                  ? 'bg-white text-[#01411C] shadow-2xs font-extrabold'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Create Account</span>
+            </button>
+          </div>
+
+          {/* 1. DEMO CARDS TAB */}
+          {authMode === 'demo' && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <span className="text-xs font-medium text-stone-500">
+                  Select a persona below to explore their dedicated role workspace instantly:
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                {roles.map((r) => (
+                  <div
+                    key={r.role}
+                    onClick={() => handleSelectDemoRole(r)}
+                    className={`bg-[#FCFBFA] rounded-2xl border p-4 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group space-y-3 ${r.accentColor}`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="w-8 h-8 rounded-lg bg-white border border-stone-200 flex items-center justify-center shrink-0 shadow-2xs">
+                          {r.icon}
+                        </div>
+                        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${r.badgeBg}`}>
+                          {r.badge}
+                        </span>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-extrabold text-[#1A2E22] group-hover:text-[#01411C] transition-colors">
+                            {r.title}
+                          </h3>
+                          <span className="text-xs font-serif font-bold text-stone-700">{r.urdu}</span>
+                        </div>
+                        <p className="text-[11px] text-[#4A5D52] leading-snug mt-1 line-clamp-2">
+                          {r.tagline}
+                        </p>
+                      </div>
+
+                      <div className="px-2 py-1 rounded-lg bg-white border border-stone-200/80 text-[10px] text-stone-600 truncate">
+                        Persona: <strong className="text-stone-900">{r.persona}</strong>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#01411C] px-2 py-0.5 rounded-md bg-[#DCFCE7] border border-[#BBF7D0]">
-                        {r.badge}
-                      </span>
-                      <h2 className="text-lg sm:text-xl font-extrabold text-[#1A2E22] group-hover:text-[#01411C] transition-colors mt-1 font-sans">
-                        {r.title}
-                      </h2>
-                    </div>
+
+                    <Button
+                      variant="executiveGreen"
+                      size="sm"
+                      className="w-full text-xs font-bold justify-center py-1.5"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectDemoRole(r);
+                      }}
+                    >
+                      <span>Enter as {r.title.split(' ')[0]}</span>
+                      <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                    </Button>
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-                <p className="text-xs text-[#4A5D52] leading-relaxed font-medium">
-                  {r.tagline}
+          {/* 2. SIGN IN FORM TAB */}
+          {authMode === 'signin' && (
+            <form onSubmit={handleSignInSubmit} className="max-w-md mx-auto space-y-4 py-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#1A2E22] flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-stone-500" />
+                  <span>Email Address</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={signInEmail}
+                  onChange={(e) => setSignInEmail(e.target.value)}
+                  placeholder="e.g. yourname@email.com or demo email"
+                  className="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#01411C] focus:bg-white"
+                />
+                <p className="text-[10px] text-stone-500">
+                  Tip: Demo accounts (e.g. <code className="bg-stone-200 px-1 rounded">amina.siddiqui@pak-homeceo.pk</code>) can also sign in here.
                 </p>
-
-                {/* Persona Header */}
-                <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80 flex items-center justify-between text-xs">
-                  <span className="text-stone-600 font-medium">
-                    Demo Account: <strong className="text-stone-900">{r.persona}</strong>
-                  </span>
-                  <span className="text-[11px] font-mono text-[#01411C] font-bold">1-Click Live</span>
-                </div>
-
-                {/* Highlights */}
-                <ul className="space-y-1.5 text-xs text-stone-600 pt-1">
-                  {r.highlights.map((h, hIdx) => (
-                    <li key={hIdx} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#01411C] shrink-0 mt-0.5" />
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
               </div>
 
-              <Button
-                variant="executiveGreen"
-                size="md"
-                className="w-full font-bold shadow-xs group-hover:shadow-md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelectRole(r);
-                }}
-              >
-                <span>Enter as {r.title}</span>
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
-          ))}
-        </div>
-
-        {/* Collapsible Direct Credentials / Phone Form Option */}
-        <div className="text-center pt-2">
-          <button
-            type="button"
-            onClick={() => setShowCredentialsForm(!showCredentialsForm)}
-            className="text-xs font-semibold text-[#4A5D52] hover:text-[#01411C] underline transition-colors cursor-pointer"
-          >
-            {showCredentialsForm ? 'Hide credentials sign-in' : 'Or sign in with Phone / Password'}
-          </button>
-
-          {showCredentialsForm && (
-            <div className="mt-4 max-w-md mx-auto p-5 bg-white rounded-2xl border border-stone-200 text-left space-y-3">
-              <div>
-                <label className="text-xs font-bold text-stone-700 block mb-1">Mobile Phone (Pakistan)</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#1A2E22] flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-stone-500" />
+                  <span>Password</span>
+                </label>
                 <input
-                  type="text"
-                  value={authPhone}
-                  onChange={(e) => setAuthPhone(e.target.value)}
-                  className="w-full p-2.5 text-xs border border-stone-300 rounded-xl"
-                  placeholder="0300-XXXXXXX"
+                  type="password"
+                  value={signInPassword}
+                  onChange={(e) => setSignInPassword(e.target.value)}
+                  placeholder="Enter your password (optional for demo accounts)"
+                  className="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#01411C] focus:bg-white"
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-stone-700 block mb-1">Assign Workspace</label>
-                <select
-                  value={authRole}
-                  onChange={(e) => setAuthRole(e.target.value as UserRole)}
-                  className="w-full p-2.5 text-xs border border-stone-300 rounded-xl bg-white"
-                >
-                  <option value="citizen">Citizen (Marketplace Access)</option>
-                  <option value="builder">Business Builder (Operations Lead)</option>
-                  <option value="partner">Skill Partner (Artisan Hub)</option>
-                  <option value="connector">Community Connector (Field Ops)</option>
-                </select>
+              <Button type="submit" variant="executiveGreen" className="w-full text-xs font-bold py-2 justify-center">
+                <LogIn className="w-3.5 h-3.5 mr-1" />
+                <span>Sign In to Platform</span>
+              </Button>
+            </form>
+          )}
+
+          {/* 3. CREATE ACCOUNT TAB */}
+          {authMode === 'register' && (
+            <form onSubmit={handleRegisterSubmit} className="max-w-lg mx-auto space-y-4 py-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#1A2E22] flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-stone-500" />
+                    <span>Full Name *</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
+                    placeholder="e.g. Sadia Khan"
+                    className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#01411C] focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#1A2E22] flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-stone-500" />
+                    <span>Email Address *</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    placeholder="e.g. sadia@gmail.com"
+                    className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#01411C] focus:bg-white"
+                  />
+                </div>
               </div>
 
-              <Button
-                onClick={() => {
-                  switchRole(authRole);
-                  const target =
-                    authRole === 'citizen' || authRole === 'patron'
-                      ? '/citizen'
-                      : authRole === 'builder'
-                      ? '/business-builder'
-                      : authRole === 'partner'
-                      ? '/skill-partner'
-                      : '/community-connector';
-                  navigate(target);
-                }}
-                variant="executiveGreen"
-                size="sm"
-                className="w-full"
-              >
-                Sign In to Workspace
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#1A2E22] flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#01411C]" />
+                  <span>Choose Your Role *</span>
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { id: 'citizen', label: 'Citizen', sub: 'Marketplace' },
+                    { id: 'builder', label: 'Business Builder', sub: 'Operations' },
+                    { id: 'partner', label: 'Skill Partner', sub: 'Artisan' },
+                    { id: 'connector', label: 'Connector', sub: 'Field QC' },
+                  ].map((roleOption) => (
+                    <button
+                      key={roleOption.id}
+                      type="button"
+                      onClick={() => setRegRole(roleOption.id as UserRole)}
+                      className={`p-2.5 rounded-xl border text-left transition-all ${
+                        regRole === roleOption.id
+                          ? 'border-[#01411C] bg-[#F0FDF4] text-[#01411C] font-extrabold shadow-2xs'
+                          : 'border-stone-200 bg-stone-50 text-stone-700 hover:bg-stone-100'
+                      }`}
+                    >
+                      <div className="text-xs">{roleOption.label}</div>
+                      <div className="text-[9px] text-stone-500 font-normal">{roleOption.sub}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#1A2E22] flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-stone-500" />
+                    <span>City</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={regCity}
+                    onChange={(e) => setRegCity(e.target.value)}
+                    placeholder="e.g. Karachi / Multan"
+                    className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#01411C] focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#1A2E22] flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-stone-500" />
+                    <span>Mobile Phone</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={regPhone}
+                    onChange={(e) => setRegPhone(e.target.value)}
+                    placeholder="0300-1234567"
+                    className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#01411C] focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#1A2E22] flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-stone-500" />
+                    <span>Password</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    placeholder="Choose password"
+                    className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#01411C] focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" variant="executiveGreen" className="w-full text-xs font-bold py-2 justify-center">
+                <UserPlus className="w-3.5 h-3.5 mr-1" />
+                <span>Create Account & Enter Platform</span>
               </Button>
-            </div>
+            </form>
           )}
+
+          {/* Workflow Sequence Banner */}
+          <div className="border-t border-stone-100 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-stone-600">
+            <div className="flex items-center gap-1.5 text-stone-800 font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+              <span>Closed-Loop Workflow:</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-1.5 text-[11px] font-medium text-stone-700">
+              <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200 font-bold">1. Citizen Orders</span>
+              <ArrowRight className="w-3 h-3 text-stone-400" />
+              <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">2. Product Manager Assigns</span>
+              <ArrowRight className="w-3 h-3 text-stone-400" />
+              <span className="px-2 py-0.5 rounded-md bg-orange-50 text-orange-800 border border-orange-200 font-bold">3. Skill Partner Crafts</span>
+              <ArrowRight className="w-3 h-3 text-stone-400" />
+              <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold">4. Connector QC & Drop</span>
+            </div>
+          </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* PLATFORM VIDEO SHOWCASE & UPLOAD (Explicitly requested by user)           */}
+        {/* PLATFORM SHOWCASE VIDEO (Excellently Placed at the Bottom)                 */}
         {/* ========================================================================= */}
-        <section className="pt-6 border-t border-stone-200/80 space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
+        <section className="bg-stone-950 rounded-3xl p-5 sm:p-7 text-white border border-stone-800 shadow-xl space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-800/80 pb-4">
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Video className="w-5 h-5 text-[#01411C]" />
-                <h2 className="text-xl sm:text-2xl font-extrabold text-[#1A2E22]">
-                  Platform Overview Video
+                <div className="w-7 h-7 rounded-lg bg-[#01411C] flex items-center justify-center text-[#86EFAC]">
+                  <Video className="w-4 h-4" />
+                </div>
+                <h2 className="text-base sm:text-lg font-extrabold text-white tracking-tight">
+                  PAK-HOMECEO Cinematic Platform Showcase
                 </h2>
               </div>
-              <p className="text-xs sm:text-sm text-[#4A5D52] mt-1">
-                Watch the complete platform walk-through, or upload your own video below to display here for all users.
+              <p className="text-xs text-stone-400">
+                Visual demonstration of home enterprise transformation across Pakistan.
               </p>
             </div>
 
-            {/* Video Controls Action Bar */}
+            {/* Video Controls Action Buttons */}
             <div className="flex items-center gap-2 flex-wrap">
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                accept="video/*"
                 onChange={handleFileUpload}
                 className="hidden"
               />
@@ -383,19 +595,21 @@ export const LoginPage: React.FC = () => {
               <Button
                 size="sm"
                 variant="executiveGreen"
-                leftIcon={<Upload className="w-4 h-4" />}
+                leftIcon={<Upload className="w-3.5 h-3.5" />}
                 onClick={() => fileInputRef.current?.click()}
+                className="text-xs"
               >
-                Upload Video File
+                Upload Video
               </Button>
 
               <Button
                 size="sm"
                 variant="outline"
-                leftIcon={<LinkIcon className="w-4 h-4" />}
+                leftIcon={<LinkIcon className="w-3.5 h-3.5" />}
                 onClick={() => setShowUrlInput(!showUrlInput)}
+                className="text-xs text-stone-200 border-stone-700 hover:bg-stone-800"
               >
-                Embed Video URL
+                Set URL
               </Button>
 
               {videoConfig.isCustomUploaded && (
@@ -404,7 +618,7 @@ export const LoginPage: React.FC = () => {
                   variant="ghost"
                   leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
                   onClick={handleResetVideo}
-                  title="Reset to default showcase"
+                  className="text-xs text-stone-400 hover:text-white"
                 >
                   Reset
                 </Button>
@@ -412,87 +626,79 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Optional Direct URL Input Drawer */}
+          {/* Collapsible URL input */}
           {showUrlInput && (
-            <form onSubmit={handleApplyCustomUrl} className="p-4 bg-white rounded-2xl border border-stone-200 flex gap-2">
+            <form
+              onSubmit={handleApplyCustomUrl}
+              className="p-3 bg-stone-900 rounded-2xl border border-stone-800 flex gap-2"
+            >
               <input
-                type="text"
+                type="url"
                 value={customUrl}
                 onChange={(e) => setCustomUrl(e.target.value)}
-                placeholder="Paste video URL (e.g. https://www.youtube.com/watch?v=... or direct MP4 link)"
-                className="flex-1 px-3 py-2 text-xs border border-stone-300 rounded-xl focus:outline-none focus:border-[#01411C]"
+                placeholder="Paste YouTube or direct video URL (e.g. https://www.youtube.com/watch?v=...)"
+                className="flex-1 px-3 py-1.5 text-xs bg-stone-950 border border-stone-700 rounded-xl text-white focus:outline-none focus:border-[#86EFAC]"
               />
               <Button type="submit" variant="executiveGreen" size="sm">
-                Apply URL
+                Apply
               </Button>
             </form>
           )}
 
-          {/* Video Player Display Container */}
-          <div className="bg-stone-900 rounded-3xl overflow-hidden shadow-2xl border-4 border-white aspect-16/9 relative group">
-            {videoConfig.isCustomUploaded && videoConfig.videoUrl.startsWith('blob:') ? (
+          {/* Cinematic Video Player Container */}
+          <div className="relative aspect-16/9 rounded-2xl overflow-hidden bg-black border border-stone-800/90 shadow-2xl flex items-center justify-center group">
+            {videoConfig.isCustomUploaded && (videoConfig.videoUrl.startsWith('blob:') || videoConfig.videoUrl.endsWith('.mp4') || videoConfig.videoUrl.endsWith('.webm')) ? (
               <video
                 src={videoConfig.videoUrl}
                 controls
-                autoPlay
-                className="w-full h-full object-contain bg-black"
+                playsInline
+                preload="metadata"
+                className="w-full h-full object-contain"
               >
-                Your browser does not support the video tag.
+                Your browser does not support HTML5 video.
               </video>
             ) : isEmbed ? (
               <iframe
                 src={videoConfig.videoUrl}
                 title={videoConfig.title}
                 className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             ) : (
-              <div className="relative w-full h-full">
+              <div 
+                className="relative w-full h-full cursor-pointer"
+                onClick={() => {
+                  fileInputRef.current?.click();
+                }}
+              >
                 <img
                   src={videoConfig.videoUrl}
-                  alt="PAK-HOMECEO Cinematic Landscape"
-                  className="w-full h-full object-cover"
+                  alt={videoConfig.title}
+                  className="w-full h-full object-cover brightness-70 group-hover:scale-102 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-stone-950/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center text-white space-y-4">
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-20 h-20 rounded-full bg-[#01411C] hover:bg-[#025c27] text-white flex items-center justify-center shadow-xl hover:scale-105 transition-all cursor-pointer border-2 border-white/40"
-                  >
-                    <Upload className="w-8 h-8" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white bg-black/40 backdrop-blur-2xs space-y-3">
+                  <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Play className="w-6 h-6 text-white ml-1 fill-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-extrabold max-w-lg">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
+                      Platform Story & Ecosystem Overview (Click to Upload / Play)
+                    </span>
+                    <h3 className="text-base sm:text-lg font-extrabold max-w-md">
                       {videoConfig.title}
                     </h3>
-                    <p className="text-xs text-stone-200 mt-1 max-w-md">
-                      Click the upload button to load your platform video file (.mp4, .webm). It will play directly inside this frame.
-                    </p>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="executiveGreen"
-                    onClick={() => fileInputRef.current?.click()}
-                    leftIcon={<Upload className="w-4 h-4" />}
-                  >
-                    Select Video from Your Computer
-                  </Button>
                 </div>
               </div>
             )}
-
-            {/* Video Status Badge */}
-            <div className="absolute top-4 left-4 bg-stone-900/80 backdrop-blur-md px-3 py-1 rounded-full text-white text-[11px] font-semibold border border-white/20 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{videoConfig.uploadedFileName ? `Custom Video: ${videoConfig.uploadedFileName}` : 'Platform Video Player Ready'}</span>
-            </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-stone-200 py-6 px-4 text-center text-xs text-stone-500 font-sans mt-12">
-        PAK-HOMECEO · Every Home Can Become an Enterprise. Every Woman Can Become a CEO.
+      <footer className="bg-white border-t border-stone-200 py-3.5 px-4 text-center text-xs text-stone-500 font-sans">
+        PAK-HOMECEO · Transforming Home Skills into Dignity, Income, and Purpose across Pakistan.
       </footer>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PageContainer } from '../layout/PageContainer';
 import { Button } from '../ui/Button';
+import { Avatar } from '../ui/Avatar';
 import {
   User,
   Settings,
@@ -69,11 +70,9 @@ export const SettingsPage: React.FC = () => {
         {/* Left Column: Profile Card & Demo Mode */}
         <div className="lg:col-span-4 space-y-6">
           <div className="p-5 bg-white rounded-2xl border border-stone-200 shadow-xs text-center space-y-4">
-            <img
-              src={currentUser.avatarUrl}
-              alt={currentUser.name}
-              className="w-20 h-20 rounded-full object-cover mx-auto border-4 border-[#F0FDF4] shadow-xs"
-            />
+            <div className="flex justify-center">
+              <Avatar name={currentUser.name} src={currentUser.avatarUrl} size="xl" />
+            </div>
             <div>
               <div className="flex items-center justify-center gap-1.5">
                 <h3 className="text-base font-bold text-[#1A2E22]">{currentUser.name}</h3>

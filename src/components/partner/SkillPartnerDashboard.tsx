@@ -8,6 +8,7 @@ import { StatCard } from '../ui/StatCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { WorkDetailModal } from './WorkDetailModal';
 import { SkillPartnerTask, SkillPartnerTaskStatus, UserRole } from '../../types';
+import { Avatar } from '../ui/Avatar';
 import {
   Volume2,
   CheckCircle2,
@@ -105,9 +106,7 @@ export const SkillPartnerDashboard: React.FC<SkillPartnerDashboardProps> = ({
     pendingPayoutPKR: 34700,
     voiceGuidanceScript:
       'Assalam-o-Alaikum Kalsoom Bibi! Raw materials for your new embroidery batch have been verified by Connector Fatima. Please check your assigned tasks and record progress.',
-    assignedConnectorName: 'Fatima Zehra',
-    avatarUrl:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+    avatarUrl: '',
   };
 
   // Associated tasks, batches, and payouts
@@ -221,17 +220,7 @@ export const SkillPartnerDashboard: React.FC<SkillPartnerDashboardProps> = ({
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-5 min-w-0">
           <div className="relative shrink-0">
-            <img
-              src={
-                currentArtisan.avatarUrl ||
-                OFFICIAL_VISUAL_LIBRARY.artisan_dignity.imageUrl
-              }
-              alt={currentArtisan.name}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover object-top border-2 border-[#01411C]/30 shadow-xs"
-            />
-            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-black/75 text-[9px] font-semibold text-stone-200 px-1.5 py-0.5 rounded-full whitespace-nowrap backdrop-blur-xs">
-              Demo Ref
-            </span>
+            <Avatar name={currentArtisan.name} size="xl" />
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
@@ -1156,11 +1145,7 @@ export const SkillPartnerDashboard: React.FC<SkillPartnerDashboardProps> = ({
 
                 {/* Business Builder */}
                 <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/80 flex items-center gap-3">
-                  <img
-                    src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=400&q=80"
-                    alt="Zainab Malik"
-                    className="w-11 h-11 rounded-xl object-cover border border-stone-300"
-                  />
+                  <Avatar name="Zainab Malik" size="md" />
                   <div className="min-w-0">
                     <h5 className="text-xs font-bold text-stone-900 truncate">Zainab Malik</h5>
                     <p className="text-[11px] text-stone-500">Enterprise Business Builder</p>
@@ -1171,11 +1156,7 @@ export const SkillPartnerDashboard: React.FC<SkillPartnerDashboardProps> = ({
                 {/* Field Connector */}
                 <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/80 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <img
-                      src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80"
-                      alt="Fatima Zehra"
-                      className="w-11 h-11 rounded-xl object-cover border border-stone-300"
-                    />
+                    <Avatar name="Fatima Zehra" size="md" />
                     <div className="min-w-0">
                       <h5 className="text-xs font-bold text-stone-900 truncate">Fatima Zehra</h5>
                       <p className="text-[11px] text-stone-500">Doorstep Quality Connector</p>

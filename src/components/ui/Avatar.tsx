@@ -43,20 +43,12 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <div className={`relative inline-block shrink-0 ${className}`}>
-      {src && !imgError ? (
-        <img
-          src={src}
-          alt={name}
-          onError={() => setImgError(true)}
-          className={`${sizeStyles[size]} rounded-xl object-cover border border-stone-200 shadow-2xs`}
-        />
-      ) : (
-        <div
-          className={`${sizeStyles[size]} rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] text-[#01411C] font-mono font-bold flex items-center justify-center select-none shadow-2xs`}
-        >
-          {getInitials(name)}
-        </div>
-      )}
+      <div
+        className={`${sizeStyles[size]} rounded-xl bg-[#01411C]/10 border border-[#01411C]/30 text-[#01411C] font-mono font-extrabold flex items-center justify-center select-none shadow-2xs`}
+        title={name}
+      >
+        {getInitials(name)}
+      </div>
 
       {isOnline !== undefined && (
         <span

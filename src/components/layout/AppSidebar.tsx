@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
+import { Avatar } from '../ui/Avatar';
 import {
   Home,
   Briefcase,
@@ -43,36 +44,32 @@ export const AppSidebar: React.FC = () => {
     { label: string; to: string; icon: React.ReactNode; badge?: string }[]
   > = {
     builder: [
-      { label: 'Command Overview', to: '/business-builder?tab=overview', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { label: 'Orders Control', to: '/business-builder?tab=orders', icon: <ShoppingBag className="w-4 h-4" /> },
-      { label: 'Skill Partners (People)', to: '/business-builder?tab=people', icon: <Users className="w-4 h-4" /> },
-      { label: 'Products Catalog', to: '/business-builder?tab=products', icon: <Package className="w-4 h-4" /> },
-      { label: 'Production Batches', to: '/business-builder?tab=batches', icon: <Layers className="w-4 h-4" /> },
-      { label: 'Business Insights', to: '/business-builder?tab=insights', icon: <TrendingUp className="w-4 h-4" /> },
+      { label: 'Overview', to: '/business-builder?tab=overview', icon: <LayoutDashboard className="w-4 h-4" /> },
+      { label: 'Orders & Briefs', to: '/business-builder?tab=orders', icon: <ShoppingBag className="w-4 h-4" /> },
+      { label: 'Skill Partners', to: '/business-builder?tab=people', icon: <Users className="w-4 h-4" /> },
+      { label: 'Batches', to: '/business-builder?tab=batches', icon: <Layers className="w-4 h-4" /> },
+      { label: 'Products', to: '/business-builder?tab=products', icon: <Package className="w-4 h-4" /> },
+      { label: 'Escrow & Revenue', to: '/business-builder?tab=insights', icon: <TrendingUp className="w-4 h-4" /> },
     ],
     partner: [
-      { label: 'Skill Partner Hub', to: '/skill-partner?tab=dashboard', icon: <Home className="w-4 h-4" /> },
-      { label: 'My Work', to: '/skill-partner?tab=work', icon: <Briefcase className="w-4 h-4" /> },
+      { label: 'My Assigned Work', to: '/skill-partner?tab=work', icon: <Briefcase className="w-4 h-4" /> },
       { label: 'My Earnings', to: '/skill-partner?tab=earnings', icon: <DollarSign className="w-4 h-4" /> },
-      { label: 'My Messages', to: '/skill-partner?tab=messages', icon: <MessageSquare className="w-4 h-4" /> },
-      { label: 'Help & Audio', to: '/skill-partner?tab=help', icon: <HelpCircle className="w-4 h-4" /> },
+      { label: 'Urdu Audio & Guide', to: '/skill-partner?tab=help', icon: <HelpCircle className="w-4 h-4" /> },
     ],
     connector: [
-      { label: 'Field Operations', to: '/community-connector', icon: <MapPin className="w-4 h-4" /> },
-      { label: 'Artisans & Visits', to: '/community-connector', icon: <Users className="w-4 h-4" /> },
-      { label: 'Material Drops', to: '/batches', icon: <Layers className="w-4 h-4" /> },
+      { label: 'Field Drop-offs', to: '/community-connector?tab=field', icon: <MapPin className="w-4 h-4" /> },
+      { label: 'Quality Audits', to: '/community-connector?tab=qc', icon: <ShieldCheck className="w-4 h-4" /> },
+      { label: 'Artisan Visits', to: '/community-connector?tab=artisans', icon: <Users className="w-4 h-4" /> },
     ],
     citizen: [
-      { label: 'Citizen Marketplace', to: '/citizen', icon: <Compass className="w-4 h-4" /> },
-      { label: 'Explore Products', to: '/products', icon: <Package className="w-4 h-4" /> },
-      { label: 'My Orders', to: '/orders', icon: <ShoppingBag className="w-4 h-4" /> },
-      { label: 'Artisan Stories & Impact', to: '/impact', icon: <TrendingUp className="w-4 h-4" /> },
+      { label: 'Marketplace', to: '/citizen', icon: <Compass className="w-4 h-4" /> },
+      { label: 'My Orders & Tracking', to: '/orders', icon: <ShoppingBag className="w-4 h-4" /> },
+      { label: 'Impact & Stories', to: '/impact', icon: <TrendingUp className="w-4 h-4" /> },
     ],
     patron: [
-      { label: 'Citizen Marketplace', to: '/citizen', icon: <Compass className="w-4 h-4" /> },
-      { label: 'Explore Products', to: '/products', icon: <Package className="w-4 h-4" /> },
-      { label: 'My Orders', to: '/orders', icon: <ShoppingBag className="w-4 h-4" /> },
-      { label: 'Artisan Stories & Impact', to: '/impact', icon: <TrendingUp className="w-4 h-4" /> },
+      { label: 'Marketplace', to: '/citizen', icon: <Compass className="w-4 h-4" /> },
+      { label: 'My Orders & Tracking', to: '/orders', icon: <ShoppingBag className="w-4 h-4" /> },
+      { label: 'Impact & Stories', to: '/impact', icon: <TrendingUp className="w-4 h-4" /> },
     ],
   };
 
@@ -83,11 +80,6 @@ export const AppSidebar: React.FC = () => {
       to: '/messages',
       icon: <MessageSquare className="w-4 h-4" />,
       badge: unreadMessagesCount > 0 ? `${unreadMessagesCount}` : undefined,
-    },
-    {
-      label: 'Platform Story',
-      to: '/how-it-works',
-      icon: <HelpCircle className="w-4 h-4" />,
     },
     {
       label: 'Settings',
@@ -216,65 +208,15 @@ export const AppSidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom Section: DEMO Role Switcher & User Profile */}
+      {/* Bottom Section: User Identity Profile */}
       <div className="space-y-3 pt-4 border-t border-stone-200/80">
-        {/* DEMO MODE Box */}
-        {demoMode && (
-          <div className="p-3 bg-[#F0FDF4] rounded-2xl border border-[#BBF7D0] space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#01411C]">
-                <Sparkles className="w-3 h-3 text-amber-600" />
-                <span>Demo Mode</span>
-              </span>
-              <button
-                type="button"
-                onClick={handleResetDemoClick}
-                title="Reset demo data"
-                className="text-[10px] font-bold text-[#01411C] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <RefreshCw className="w-2.5 h-2.5" />
-                <span>Reset</span>
-              </button>
-            </div>
-
-            {/* Quick 4-role switcher pills */}
-            <div className="grid grid-cols-2 gap-1 text-[10px] font-bold">
-              {[
-                { id: 'builder', label: 'Builder' },
-                { id: 'partner', label: 'Partner' },
-                { id: 'connector', label: 'Connector' },
-                { id: 'citizen', label: 'Citizen' },
-              ].map((r) => {
-                const isActive = currentRole === r.id || (r.id === 'citizen' && currentRole === 'patron');
-                return (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => handleRoleSwitch(r.id as UserRole)}
-                    className={`py-1 px-1.5 rounded-lg transition-all text-center cursor-pointer ${
-                      isActive
-                        ? 'bg-[#01411C] text-white shadow-xs'
-                        : 'bg-white text-[#4A5D52] hover:bg-emerald-50 hover:text-[#01411C] border border-stone-200/60'
-                    }`}
-                  >
-                    {r.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* User Identity Card */}
         <Link
           to="/settings"
           className="flex items-center gap-3 p-2 rounded-xl hover:bg-[#F0FDF4] transition-colors border border-transparent hover:border-[#BBF7D0] group"
         >
-          <img
-            src={currentUser.avatarUrl}
-            alt={currentUser.name}
-            className="w-9 h-9 rounded-full object-cover border border-stone-200 shrink-0"
-          />
+          <Avatar name={currentUser.name} src={currentUser.avatarUrl} size="md" />
           <div className="min-w-0 flex-1">
             <p className="text-xs font-bold text-[#1A2E22] truncate group-hover:text-[#01411C]">
               {currentUser.name}

@@ -9,6 +9,93 @@
     <meta property="og:description" content="Every Home Can Become an Enterprise. Every Woman Can Become a CEO. Built around dignity, skill, income and human connection." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Suppress Vite preview WebSocket reconnection errors & console error overlays
+      (function() {
+        // 1. Intercept window.WebSocket in development mode to prevent broken HMR socket attempts
+        var OrigWebSocket = window.WebSocket;
+        if (OrigWebSocket) {
+          window.WebSocket = function(url, protocols) {
+            var urlStr = String(url || '');
+            var protoStr = String(protocols || '');
+            if (
+              protoStr.includes('vite-hmr') ||
+              urlStr.includes('vite') ||
+              urlStr.includes('localhost') ||
+              urlStr.includes('0.0.0.0') ||
+              urlStr.includes('ws://') ||
+              urlStr.includes('wss://')
+            ) {
+              var dummy = {
+                url: urlStr,
+                readyState: 3, // CLOSED
+                bufferedAmount: 0,
+                extensions: '',
+                protocol: '',
+                binaryType: 'blob',
+                send: function() {},
+                close: function() {},
+                addEventListener: function() {},
+                removeEventListener: function() {},
+                dispatchEvent: function() { return true; },
+                onopen: null,
+                onmessage: null,
+                onerror: null,
+                onclose: null,
+              };
+              return dummy;
+            }
+            return new OrigWebSocket(url, protocols);
+          };
+          window.WebSocket.prototype = OrigWebSocket.prototype;
+          window.WebSocket.CONNECTING = 0;
+          window.WebSocket.OPEN = 1;
+          window.WebSocket.CLOSING = 2;
+          window.WebSocket.CLOSED = 3;
+        }
+
+        // 2. Intercept console.error to filter out Vite WebSocket messages
+        var _origError = console.error;
+        console.error = function() {
+          var args = Array.prototype.slice.call(arguments);
+          var msg = args.map(String).join(' ');
+          if (
+            msg.includes('failed to connect to websocket') ||
+            msg.includes('WebSocket closed without opened') ||
+            msg.includes('[vite]')
+          ) {
+            return;
+          }
+          _origError.apply(console, args);
+        };
+
+        // 3. Intercept unhandledrejection events
+        window.addEventListener('unhandledrejection', function(event) {
+          var reasonStr = String(event.reason || '');
+          if (
+            reasonStr.includes('WebSocket closed without opened') ||
+            reasonStr.includes('failed to connect to websocket') ||
+            reasonStr.includes('[vite]')
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }, true);
+
+        // 4. Intercept error events
+        window.addEventListener('error', function(event) {
+          var msgStr = String(event.message || '');
+          if (
+            msgStr.includes('WebSocket closed without opened') ||
+            msgStr.includes('failed to connect to websocket') ||
+            msgStr.includes('[vite]')
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }, true);
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />

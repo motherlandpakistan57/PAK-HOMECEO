@@ -15,6 +15,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { StatCard } from '../ui/StatCard';
 import { StatusBadge } from '../ui/StatusBadge';
 import { PageHeader } from '../ui/PageHeader';
+import { Avatar } from '../ui/Avatar';
 import { CreateProductModal } from './modals/CreateProductModal';
 import { EditProductModal } from './modals/EditProductModal';
 import { CreateBatchModal } from './modals/CreateBatchModal';
@@ -1127,14 +1128,7 @@ export const BusinessBuilderDashboard: React.FC<BusinessBuilderDashboardProps> =
                     {/* Header */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={
-                            partner.avatarUrl ||
-                            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80'
-                          }
-                          alt={partner.name}
-                          className="w-14 h-14 rounded-2xl object-cover border border-stone-200"
-                        />
+                        <Avatar name={partner.name} src={partner.avatarUrl} size="lg" />
                         <div>
                           <div className="flex items-center gap-2 mb-0.5">
                             <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-[#F0FDF4] text-[#01411C] border border-[#BBF7D0]">

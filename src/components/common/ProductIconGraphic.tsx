@@ -116,7 +116,7 @@ export const ProductIconGraphic: React.FC<ProductIconGraphicProps> = ({ iconType
               </svg>
             </div>
             <span className="block mt-3 text-xs tracking-wider uppercase font-semibold text-amber-100">
-              Wild Sidr Honey & Halwa Box
+              Pure Village Desi Ghee & Halwa
             </span>
           </div>
         </div>
@@ -134,7 +134,7 @@ export const ProductIconGraphic: React.FC<ProductIconGraphicProps> = ({ iconType
               </svg>
             </div>
             <span className="block mt-3 text-xs tracking-wider uppercase font-semibold text-blue-100">
-              Heritage Pedagogy & Masterclass
+              Ancestral Craft Pattern Manual
             </span>
           </div>
         </div>

@@ -47,7 +47,7 @@ export const AddSkillPartnerModal: React.FC<AddSkillPartnerModalProps> = ({ isOp
       voiceGuidanceScript: voiceScript.trim(),
       consentRecorded: true,
       assignedConnectorName: assignedConnector,
-      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+      avatarUrl: '',
     });
 
     onClose();

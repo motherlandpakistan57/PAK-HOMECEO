@@ -1,6 +1,7 @@
 import React from 'react';
 import { SkillPartnerProfile } from '../../../types';
 import { Button } from '../../ui/Button';
+import { Avatar } from '../../ui/Avatar';
 import { X, ShieldCheck, CheckCircle2, DollarSign, MapPin, Award, Phone, Users } from 'lucide-react';
 
 interface ViewPartnerProfileModalProps {
@@ -33,11 +34,7 @@ export const ViewPartnerProfileModal: React.FC<ViewPartnerProfileModalProps> = (
       >
         <div className="p-5 sm:p-6 border-b border-stone-100 bg-[#FAF9F6] flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img
-              src={partner.avatarUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80'}
-              alt={partner.name}
-              className="w-16 h-16 rounded-2xl object-cover border-2 border-[#01411C]/30 shrink-0"
-            />
+            <Avatar name={partner.name} src={partner.avatarUrl} size="xl" />
             <div>
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-[#F0FDF4] text-[#01411C] border border-[#BBF7D0]">
